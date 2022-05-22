@@ -4,7 +4,6 @@ sys.path.append("./")
 sys.path.append("./packages")
 from lib.utils import save_image
 from lib.config import Config
-from MyModel.model import MyModel
 import torch
 import wandb
 
@@ -13,8 +12,14 @@ def train(gpu, args):
     torch.cuda.set_device(gpu)
 
     # convert dictionary to class
-    args = Config(args)    
-    model = MyModel(args, gpu)
+    args = Config(args)
+    if args.model_id == "psp":
+        from psp.model import PSPModel
+        model = PSPModel(args, gpu)
+
+    if args.model_id == "e4e":
+        from e4e.model import E4EModel
+        model = E4EModel(args, gpu)
 
     # Initialize wandb to gather and display loss on dashboard 
     if args.isMaster and args.use_wandb:

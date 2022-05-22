@@ -5,6 +5,7 @@ import cv2
 import os
 import glob
 
+
 def get_all_images(dataset_root_list):
     image_path_list = []
     image_num_list = []
@@ -25,18 +26,6 @@ def requires_grad(model, flag=True):
     for p in model.parameters():
         p.requires_grad = flag
         
-def weight_init(m):
-    if isinstance(m, nn.Linear):
-        m.weight.data.normal_(0, 0.001)
-        m.bias.data.zero_()
-        
-    if isinstance(m, nn.Conv2d):
-        nn.init.xavier_normal_(m.weight.data)
-
-    if isinstance(m, nn.ConvTranspose2d):
-        nn.init.xavier_normal_(m.weight.data)
-
-
 def update_net(optimizer, loss):
     optimizer.zero_grad()  
     loss.backward()   
@@ -66,7 +55,3 @@ def make_grid_image(images_list):
 
     grid = torch.cat(grid_rows, dim=1)
     return grid
-
-def requires_grad(model, flag=True):
-    for p in model.parameters():
-        p.requires_grad = flag
