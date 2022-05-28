@@ -12,7 +12,8 @@ class PSPModel(ModelInterface):
         self.E = GradualStyleEncoder().cuda(self.gpu).train()
         self.SG = FaceGeneratorRosinality(ckpt_path=self.args.stylegan_path).cuda(self.gpu).eval()
         self.CF = CurrFace().cuda(self.gpu).eval()
-        self.w_avg = self.SG.get_w_avg()
+        if not self.args.load_ckpt:
+            self.w_avg = self.SG.get_w_avg()
 
     def set_loss_collector(self):
         self._loss_collector = PSPLoss(self.args)

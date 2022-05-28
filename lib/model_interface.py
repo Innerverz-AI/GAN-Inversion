@@ -102,12 +102,12 @@ class ModelInterface(metaclass=abc.ABCMeta):
         # self.D = torch.nn.parallel.DistributedDataParallel(self.D, device_ids=[self.gpu]).module
 
 
-    def save_checkpoint(self, global_step):
+    def save_checkpoint(self, global_step, w_avg):
         """
         Save model and optimizer parameters.
         """
-        checkpoint.save_checkpoint(self.args, self.E, self.opt_E, name='E', global_step=global_step)
-        # checkpoint.save_checkpoint(self.args, self.D, self.opt_D, name='D', global_step=global_step)
+        checkpoint.save_checkpoint(self.args, self.E, self.opt_E, name='E', global_step=global_step, w_avg=self.w_avg)
+        # checkpoint.save_checkpoint(self.args, self.D, self.opt_D, name='D', global_step=self.global_step, w_avg=self.w_avg)
         
         if self.args.isMaster:
             print(f"\nCheckpoints are succesively saved in {self.args.save_root}/{self.args.run_id}/ckpt/\n")
@@ -117,7 +117,7 @@ class ModelInterface(metaclass=abc.ABCMeta):
         Load pretrained parameters from checkpoint to the initialized models.
         """
 
-        self.args.global_step = \
+        self.global_step, self.w_avg = \
         checkpoint.load_checkpoint(self.args, self.E, self.opt_E, "E")
         # checkpoint.load_checkpoint(self.args, self.D, self.opt_D, "D")
 

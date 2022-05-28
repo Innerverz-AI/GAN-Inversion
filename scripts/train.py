@@ -26,7 +26,7 @@ def train(gpu, args):
         wandb.init(project=args.model_id, name=args.run_id)
 
     # Training loop
-    global_step = args.global_step if args.load_ckpt else 0
+    global_step = model.global_step if args.load_ckpt else 0
     while global_step < args.max_step:
 
         # go one step
@@ -50,7 +50,7 @@ def train(gpu, args):
 
             # Save checkpoint parameters 
             if global_step % args.ckpt_cycle == 0:
-                model.save_checkpoint(global_step)
+                model.save_checkpoint(global_step, model.w_avg)
 
         global_step += 1
 

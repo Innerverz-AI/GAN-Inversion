@@ -10,12 +10,13 @@ def load_checkpoint(args, model, optimizer, name):
     model.load_state_dict(ckpt_dict['model'], strict=False)
     optimizer.load_state_dict(ckpt_dict['optimizer'])
 
-    return ckpt_dict['global_step']
+    return ckpt_dict['global_step'], ckpt_dict['w_avg']
 
-def save_checkpoint(args, model, optimizer, name, global_step):
+def save_checkpoint(args, model, optimizer, name, global_step, w_avg):
     
     ckpt_dict = {}
     ckpt_dict['global_step'] = global_step
+    ckpt_dict['w_avg'] = w_avg
     ckpt_dict['model'] = model.state_dict()
     ckpt_dict['optimizer'] = optimizer.state_dict()
 

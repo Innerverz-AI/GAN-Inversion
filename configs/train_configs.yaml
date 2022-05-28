@@ -36,7 +36,7 @@ W_adv: 0
 W_id: 0.1
 W_recon: 1
 W_cycle: 0
-W_lpips: 0.8
+W_lpips: 2
 W_attr: 0
 W_feat: 0
 
@@ -70,5 +70,5 @@ ckpt_cycle: 5000
 # if ckpt_id is empty, load G_latest.pt and D_latest.pt
 # Note that an empty space is None, but None is "None"
 load_ckpt: False
-ckpt_id: 
+ckpt_id:
 ckpt_step:
