@@ -29,12 +29,10 @@ class LossInterface(metaclass=abc.ABCMeta):
         print(f"[ {seconds//3600//24:02}d {(seconds//3600)%24:02}h {(seconds//60)%60:02}m {seconds%60:02}s ]")
         print(f'steps: {global_step:06} / {self.args.max_step}')
 
-        
-
-        print(f'lossD: {self.loss_dict["L_D"]} | lossG: {self.loss_dict["L_G"]}')
+        print(f'lossD: {self.loss_dict["L_D"]} | lossE: {self.loss_dict["L_E"]}')
 
     @abc.abstractmethod
-    def get_loss_G(self):
+    def get_loss_E(self):
         """
         Caculate generator loss.
         Once loss values are saved in self.loss_dict, they can be uploaded on the 

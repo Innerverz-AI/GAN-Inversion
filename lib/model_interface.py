@@ -98,7 +98,7 @@ class ModelInterface(metaclass=abc.ABCMeta):
         utils.setup_ddp(self.gpu, self.args.gpu_num)
 
         # Data parallelism is required to use multi-GPU
-        self.G = torch.nn.parallel.DistributedDataParallel(self.G, device_ids=[self.gpu], broadcast_buffers=False, find_unused_parameters=True).module
+        self.E = torch.nn.parallel.DistributedDataParallel(self.E, device_ids=[self.gpu], broadcast_buffers=False, find_unused_parameters=True).module
         # self.D = torch.nn.parallel.DistributedDataParallel(self.D, device_ids=[self.gpu]).module
 
 
@@ -106,7 +106,7 @@ class ModelInterface(metaclass=abc.ABCMeta):
         """
         Save model and optimizer parameters.
         """
-        checkpoint.save_checkpoint(self.args, self.G, self.opt_G, name='G', global_step=global_step)
+        checkpoint.save_checkpoint(self.args, self.E, self.opt_E, name='E', global_step=global_step)
         # checkpoint.save_checkpoint(self.args, self.D, self.opt_D, name='D', global_step=global_step)
         
         if self.args.isMaster:
@@ -118,7 +118,7 @@ class ModelInterface(metaclass=abc.ABCMeta):
         """
 
         self.args.global_step = \
-        checkpoint.load_checkpoint(self.args, self.G, self.opt_G, "G")
+        checkpoint.load_checkpoint(self.args, self.E, self.opt_E, "E")
         # checkpoint.load_checkpoint(self.args, self.D, self.opt_D, "D")
 
         if self.args.isMaster:
@@ -126,9 +126,9 @@ class ModelInterface(metaclass=abc.ABCMeta):
 
     def set_optimizers(self):
         if self.args.optimizer == "Adam":
-            self.opt_G = torch.optim.Adam(self.G.parameters(), lr=self.args.lr_G, betas=self.args.betas)
+            self.opt_E = torch.optim.Adam(self.E.parameters(), lr=self.args.lr_E, betas=self.args.betas)
         if self.args.optimizer == "Ranger":
-            self.opt_G = Ranger(self.G.parameters(), lr=self.args.lr_G, betas=self.args.betas)
+            self.opt_E = Ranger(self.E.parameters(), lr=self.args.lr_E, betas=self.args.betas)
         # self.opt_D = torch.optim.Adam(self.D.parameters(), lr=self.args.lr_D, betas=(self.args.beta1, self.args.beta2))
 
     @abc.abstractmethod

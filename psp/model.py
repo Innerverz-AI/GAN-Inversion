@@ -1,14 +1,18 @@
+import torch.nn.functional as F
 import torch
 from lib import utils
 from lib.model_interface import ModelInterface
 from psp.loss import PSPLoss
-from psp.nets import PSPEncoder
-
+from psp.nets import GradualStyleEncoder
+from packages import FaceGeneratorRosinality
+from packages import CurrFace
 
 class PSPModel(ModelInterface):
     def set_networks(self):
-        self.G = PSPEncoder().cuda(self.gpu).train()
-        self.G.face_generator.generator.eval()
+        self.E = GradualStyleEncoder().cuda(self.gpu).train()
+        self.SG = FaceGeneratorRosinality(ckpt_path=self.args.stylegan_path).cuda(self.gpu).eval()
+        self.CF = CurrFace().cuda(self.gpu).eval()
+        self.w_avg = self.SG.get_w_avg()
 
     def set_loss_collector(self):
         self._loss_collector = PSPLoss(self.args)
@@ -19,15 +23,15 @@ class PSPModel(ModelInterface):
         I_source = self.load_next_batch()
         self.dict["I_source"] = I_source
 
-        # run G
-        self.run_G()
+        # run E
+        self.run_E()
 
-        # update G
-        loss_G = self.loss_collector.get_loss_G(self.dict)
-        utils.update_net(self.opt_G, loss_G)
+        # update E
+        loss_E = self.loss_collector.get_loss_E(self.dict)
+        utils.update_net(self.opt_E, loss_E)
 
         # run D
-        self.run_D()
+        # self.run_D()
 
         # update D
         self.loss_collector.get_loss_D(self.dict)
@@ -38,25 +42,30 @@ class PSPModel(ModelInterface):
             self.dict["I_recon"],
             ]
 
-    def run_G(self):
-        I_recon = self.G(self.dict["I_source"])
-        id_recon = self.G.get_id(I_recon)
+    def run_E(self):
+        w_fake = self.E(self.dict["I_source"])
+        I_recon, _ = self.SG(w_fake + self.w_avg) # 1024x1024
+        id_recon = self.CF(I_recon)
         with torch.no_grad():
-            id_source = self.G.get_id(self.dict["I_source"]).detach()
+            id_source = self.CF(self.dict["I_source"])
 
-        self.dict["I_recon"] = I_recon
+        # d_adv = self.SG.discriminator(I_recon)
+
+        self.dict["I_recon"] = F.interpolate(I_recon, (256,256))
         self.dict["id_source"] = id_source
         self.dict["id_recon"] = id_recon
+        # self.dict["d_adv"] = d_adv
 
     def run_D(self):
         pass
 
-    def do_validation(self, step):
+    def do_validation(self, global_step):
         with torch.no_grad():
-            result_images = self.G(self.valid_source)
+            w_fake = self.E(self.valid_source)
+            result_images, _ = self.SG(w_fake + self.w_avg) # 1024x1024
         self.valid_images = [
             self.valid_source, 
-            result_images
+            F.interpolate(result_images, (256,256))
             ]
 
     @property

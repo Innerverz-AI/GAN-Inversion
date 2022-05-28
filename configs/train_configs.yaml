@@ -1,5 +1,7 @@
 # model [psp/e4e]
 model_id: psp
+stylegan_path: packages/stylegan2_rosinality/ckpt/kface_50000.pt
+# stylegan_path: packages/stylegan2_rosinality/ckpt/stylegan2-ffhq-config-f.pt
 
 # multi-GPUs
 use_mGPU: True
@@ -9,13 +11,14 @@ use_validation: True
 valid_dataset_root: ./assets/k-celeb
 
 # wandb
-use_wandb: True
+use_wandb: False
 wandb_alert_thres: 1000
 
 # root
 train_dataset_root_list: [
-                '../dataset/CelebHQ',
-                '../dataset/ffhq70k'
+                # '../dataset/CelebHQ',
+                # '../dataset/ffhq70k'
+                "../dataset/kface_wild_1024"
             ]
 
 save_root: train_result
@@ -28,7 +31,7 @@ betas: [0.95, 0.999] # default: Adam (0.9, 0.999) / Ranger (0.95, 0.999)
 # weight of loss
 # for psp
 # learning rate
-lr_G: 0.0001
+lr_E: 0.0001
 W_adv: 0
 W_id: 0.1
 W_recon: 1
@@ -59,8 +62,8 @@ max_step: 400000
 
 # log cycle
 loss_cycle: 10
-test_cycle: 1000
-ckpt_cycle: 10000
+test_cycle: 500
+ckpt_cycle: 5000
 
 # ckpt path
 # load checkpoints from ./train_result/{ckpt_id}/ckpt/G_{ckpt_step}.pt
